@@ -1,7 +1,6 @@
 package com.github.fabriciolfj.fraud.handler.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.github.fabriciolfj.paymentcard.handler.dto.ErrorDetailsDTO;
 import lombok.Builder;
 import lombok.Getter;
 

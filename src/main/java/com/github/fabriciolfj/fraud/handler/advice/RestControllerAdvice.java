@@ -1,8 +1,7 @@
 package com.github.fabriciolfj.fraud.handler.advice;
 
-
-import com.github.fabriciolfj.paymentcard.handler.dto.ErrorDTO;
-import com.github.fabriciolfj.paymentcard.handler.dto.ErrorDetailsDTO;
+import com.github.fabriciolfj.fraud.handler.dto.ErrorDTO;
+import com.github.fabriciolfj.fraud.handler.dto.ErrorDetailsDTO;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
