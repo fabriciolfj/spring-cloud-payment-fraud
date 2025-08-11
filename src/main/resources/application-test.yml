@@ -1,0 +1,65 @@
+server:
+  port: 8082
+  shutdown: graceful
+  tomcat:
+    connection-timeout: 2s
+    keep-alive-timeout: 15s
+    threads:
+      max: 50
+      min-spare: 5
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/fraud
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
+  kafka:
+    bootstrap-servers:
+      - localhost:29092
+      - localhost:29093
+      - localhost:29094
+  cloud:
+    function:
+      definition: hours|amount
+    stream:
+      binder:
+        transaction:
+          transaction-id-prefix: tx-
+        configuration:
+          isolation.level: read_committed
+          retries: 1
+          acks: all
+          processing.guarantee: exactly_once
+      bindings:
+        hoursamount-in-0:
+          destination: process-fraud
+          group: ${spring.application.name}
+          content-type: application/json
+          consumer:
+            auto-offset-reset: earliest
+            max-attempts: 3
+            back-off-initial-interval: 1000
+        hoursamount-out-0:
+          content-type: application/json
+          destination: transaction-processed
+          group: ${spring.application.name}
+  flyway:
+    locations:
+      - db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "metrics,health"
+  metrics:
+    export:
+      enabled: true
+
+key:
+  value: test
+
+limit:
+  hours: 23
+  amount: 10000
