@@ -27,9 +27,9 @@ public class PaymentRequest extends ValidationUtil<PaymentRequest> {
     @NotBlank(message = "{payment.cardToken.notBlank}")
     private String cardToken;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     @NotNull(message = "{payment.dateTime.notNull}")
-    private LocalDateTime dateTime;
+    private LocalDateTime date;
 
     @NotBlank(message = "{payment.customerId.notBlank}")
     private String customerId;
@@ -43,6 +43,6 @@ public class PaymentRequest extends ValidationUtil<PaymentRequest> {
     }
 
     private int getHours() {
-        return this.dateTime.getHour();
+        return this.date.getHour();
     }
 }
