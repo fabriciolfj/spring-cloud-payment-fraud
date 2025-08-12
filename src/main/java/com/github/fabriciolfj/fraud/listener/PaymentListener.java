@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fabriciolfj.fraud.dto.PaymentRequest;
 import com.github.fabriciolfj.fraud.dto.ResultAssessmentResponse;
+import com.github.fabriciolfj.fraud.dto.ResultValidation;
 import com.github.fabriciolfj.fraud.handler.exceptions.FailDeserializationException;
 import com.github.fabriciolfj.fraud.service.ProcessScoreService;
 import com.github.fabriciolfj.fraud.service.ValidateAmountTransactionService;
@@ -29,13 +30,13 @@ public class PaymentListener {
     private final ObjectMapper mapper;
 
     @Bean
-    public Function<String, Tuple2<Boolean, PaymentRequest>> hours() {
+    public Function<String, ResultValidation> hours() {
         return value -> {
             try {
                 final PaymentRequest request = mapper.readValue(value, PaymentRequest.class);
                 var result = validateHoursTransactionService.execute(request);
 
-                return Tuples.of(result, request);
+                return new ResultValidation(result, request);
             } catch (JsonProcessingException e) {
                 log.error("fail deserialization details {}", e.getMessage());
                 throw new FailDeserializationException();
@@ -44,12 +45,12 @@ public class PaymentListener {
     }
 
     @Bean
-    public Function<Tuple2<Boolean, PaymentRequest>, ResultAssessmentResponse> amount() {
+    public Function<ResultValidation, ResultAssessmentResponse> amount() {
         return value -> {
-            var result = validateAmountTransactionService.execute(value.getT2());
-            var assessments = List.of(value.getT1(), result);
+            var result = validateAmountTransactionService.execute(value.getRequest());
+            var assessments = List.of(value.isValidationHours(), result);
 
-            return processScoreService.execute(assessments, value.getT2().getCode());
+            return processScoreService.execute(assessments, value.getCode());
         };
     }
 }
