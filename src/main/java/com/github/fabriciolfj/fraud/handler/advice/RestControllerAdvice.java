@@ -2,6 +2,7 @@ package com.github.fabriciolfj.fraud.handler.advice;
 
 import com.github.fabriciolfj.fraud.handler.dto.ErrorDTO;
 import com.github.fabriciolfj.fraud.handler.dto.ErrorDetailsDTO;
+import com.github.fabriciolfj.fraud.handler.exceptions.FraudNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -24,6 +25,14 @@ public class RestControllerAdvice {
 
     private static final String MESSAGE_VALIDATION = "validação dos campos da requisição";
 
+    @ExceptionHandler(FraudNotFoundException.class)
+    public ResponseEntity handleFraudNotFoundException(final FraudNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ErrorDTO.builder()
+                        .code(HttpStatus.NOT_FOUND.value())
+                        .message(e.getMessage())
+                        .build());
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {

@@ -6,6 +6,7 @@ import com.github.fabriciolfj.fraud.dto.PaymentRequest;
 import com.github.fabriciolfj.fraud.dto.ResultAssessmentResponse;
 import com.github.fabriciolfj.fraud.dto.ResultValidation;
 import com.github.fabriciolfj.fraud.handler.exceptions.FailDeserializationException;
+import com.github.fabriciolfj.fraud.service.FraudService;
 import com.github.fabriciolfj.fraud.service.ProcessScoreService;
 import com.github.fabriciolfj.fraud.service.ValidateAmountTransactionService;
 import com.github.fabriciolfj.fraud.service.ValidateHoursTransactionService;
@@ -13,11 +14,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
-
 import java.util.List;
 import java.util.function.Function;
+
+import static com.github.fabriciolfj.fraud.listener.ResultAssessmentResponseMapper.toDocument;
 
 @Component
 @Slf4j
@@ -28,6 +28,7 @@ public class PaymentListener {
     private final ValidateAmountTransactionService validateAmountTransactionService;
     private final ProcessScoreService processScoreService;
     private final ObjectMapper mapper;
+    private final FraudService fraudService;
 
     @Bean
     public Function<String, ResultValidation> hours() {
@@ -48,9 +49,10 @@ public class PaymentListener {
     public Function<ResultValidation, ResultAssessmentResponse> amount() {
         return value -> {
             var result = validateAmountTransactionService.execute(value.getRequest());
-            var assessments = List.of(value.isValidationHours(), result);
+            var resultScore = processScoreService.execute(List.of(value.isValidationHours(), result), value.getCode());
 
-            return processScoreService.execute(assessments, value.getCode());
+            fraudService.saveDocument(toDocument(resultScore));
+            return resultScore;
         };
     }
 }
