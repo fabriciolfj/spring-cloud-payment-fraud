@@ -1,7 +1,5 @@
 package com.github.fabriciolfj.fraud.listener;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fabriciolfj.fraud.dto.PaymentRequest;
 import com.github.fabriciolfj.fraud.dto.ResultAssessmentResponse;
 import com.github.fabriciolfj.fraud.dto.ResultValidation;
@@ -14,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.util.List;
 import java.util.function.Function;
 
@@ -27,7 +27,7 @@ public class PaymentListener {
     private final ValidateHoursTransactionService validateHoursTransactionService;
     private final ValidateAmountTransactionService validateAmountTransactionService;
     private final ProcessScoreService processScoreService;
-    private final ObjectMapper mapper;
+    private final JsonMapper mapper;
     private final FraudService fraudService;
 
     @Bean
@@ -38,7 +38,7 @@ public class PaymentListener {
                 var result = validateHoursTransactionService.execute(request);
 
                 return new ResultValidation(result, request);
-            } catch (JsonProcessingException e) {
+            } catch (Exception e) {
                 log.error("fail deserialization details {}", e.getMessage());
                 throw new FailDeserializationException();
             }
